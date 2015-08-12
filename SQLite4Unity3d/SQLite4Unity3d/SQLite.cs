@@ -229,7 +229,45 @@ namespace SQLite4Unity3d
 				var ti = new ColumnInfo ();
 				ti.Name = "magic";
 			}
+
+			Initialize();
 		}
+
+#if !UNITY_EDITOR && UNITY_ANDROID
+		private static bool initialized;
+
+		/// <summary>
+		/// Initialize android.
+		///
+		/// In initialization it passes path of temporary directory to libsqlite.so.
+		/// This is required since Android has no linux like /tmp and it seems no way to
+		/// get temporary directory path from JNI written in C.
+		/// </summary>
+		public static void Initialize()
+		{
+			if (!initialized) {
+				initialized = true;
+
+				if (Thread.CurrentThread.IsBackground) {
+					throw new InvalidOperationException("SQLiteConnection.Initialize() must be called in MainThread, " +
+					                                    "which may be called implicitly.");
+				}
+
+				using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
+					using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity")) {
+						using (AndroidJavaObject cacheDir = currentActivity.Call<AndroidJavaObject>("getCacheDir")) {
+							SQLite3.sqlite3_set_temp_directory(cacheDir.Call<string>("getCanonicalPath"));
+						}
+					}
+				}
+			}
+		}
+#else
+		[System.Diagnostics.Conditional("UNITY_ANDROID")]
+		public static void Initialize()
+		{
+		}
+#endif
 
         public void EnableLoadExtension(int onoff)
         {
@@ -3281,6 +3319,11 @@ namespace SQLite4Unity3d
 		{
 			return (ExtendedResult)Sqlite3.sqlite3_extended_errcode(db);
 		}
+#endif
+
+#if !UNITY_EDITOR && UNITY_ANDROID
+		[DllImport("sqlite3", EntryPoint = "sqlite3_set_temp_directory", CallingConvention = CallingConvention.Cdecl)]
+		public static extern void sqlite3_set_temp_directory([MarshalAs(UnmanagedType.LPStr)] string directoryPath);
 #endif
 
 		public enum ColType : int

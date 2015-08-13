@@ -24,7 +24,6 @@
 #endif
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Reflection;
@@ -44,6 +43,8 @@ using Sqlite3Statement = Sqlite.Statement;
 using Sqlite3DatabaseHandle = System.IntPtr;
 using Sqlite3Statement = System.IntPtr;
 #endif
+
+using UnityEngine;
 
 namespace SQLite4Unity3d
 {
@@ -133,7 +134,7 @@ namespace SQLite4Unity3d
 		private long _elapsedMilliseconds = 0;
 
 		private int _transactionDepth = 0;
-		private Random _rand = new Random ();
+		private System.Random _rand = new System.Random ();
 
 		public Sqlite3DatabaseHandle Handle { get; private set; }
 		internal static readonly Sqlite3DatabaseHandle NullHandle = default(Sqlite3DatabaseHandle);
@@ -655,7 +656,7 @@ namespace SQLite4Unity3d
 			
 			if (TimeExecution) {
 				if (_sw == null) {
-					_sw = new Stopwatch ();
+					_sw = new System.Diagnostics.Stopwatch ();
 				}
 				_sw.Reset ();
 				_sw.Start ();
@@ -666,7 +667,7 @@ namespace SQLite4Unity3d
 			if (TimeExecution) {
 				_sw.Stop ();
 				_elapsedMilliseconds += _sw.ElapsedMilliseconds;
-				Debug.WriteLine (string.Format ("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
+				InvokeTrace (string.Format ("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
 			}
 			
 			return r;
@@ -678,7 +679,7 @@ namespace SQLite4Unity3d
 			
 			if (TimeExecution) {
 				if (_sw == null) {
-					_sw = new Stopwatch ();
+					_sw = new System.Diagnostics.Stopwatch ();
 				}
 				_sw.Reset ();
 				_sw.Start ();
@@ -689,7 +690,7 @@ namespace SQLite4Unity3d
 			if (TimeExecution) {
 				_sw.Stop ();
 				_elapsedMilliseconds += _sw.ElapsedMilliseconds;
-				Debug.WriteLine (string.Format ("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
+				InvokeTrace (string.Format ("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
 			}
 			
 			return r;
